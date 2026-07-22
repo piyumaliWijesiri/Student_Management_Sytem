@@ -47,8 +47,8 @@ export default function TopNavbar() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-white">
-              Student MS
+            <Link href="/" className="flex items-center gap-2">
+              <img src="/logo.png" alt="Student MS" className="h-10 w-auto" />
             </Link>
           </div>
 
