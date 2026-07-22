@@ -22,23 +22,29 @@ export default function DashboardPage() {
     recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) {
       router.push('/login');
       return;
     }
+    setRole(auth.getRole());
     fetchDashboardData();
   }, [router]);
 
   const fetchDashboardData = async () => {
     try {
+      const currentRole = auth.getRole();
       const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
 
+      // Only fetch "my courses" for students -- admins/instructors don't enroll
       const [studentsRes, coursesRes, myCoursesRes] = await Promise.all([
         studentAPI.getAll(),
         courseAPI.getAll(),
-        studentId ? enrollmentAPI.getMyCourses(studentId) : Promise.resolve({ data: [] }),
+        currentRole === 'STUDENT' && studentId
+          ? enrollmentAPI.getMyCourses(studentId)
+          : Promise.resolve({ data: [] }),
       ]);
 
       setStats({
@@ -56,13 +62,14 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-xl">Loading dashboard...</div>
       </div>
     );
   }
 
   const user = auth.getUser();
+  const isStudent = role === 'STUDENT';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -70,7 +77,7 @@ export default function DashboardPage() {
         Welcome, {user?.email || 'User'}!
       </h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${isStudent ? 'lg:grid-cols-3' : ''} gap-6 mb-8`}>
         <div className="bg-blue-600 p-6 rounded-lg shadow-md">
           <h3 className="text-blue-100 text-sm font-medium">Total Students</h3>
           <p className="text-3xl font-bold mt-2 text-white">{stats.totalStudents}</p>
@@ -79,10 +86,13 @@ export default function DashboardPage() {
           <h3 className="text-green-100 text-sm font-medium">Available Courses</h3>
           <p className="text-3xl font-bold mt-2 text-white">{stats.totalCourses}</p>
         </div>
-        <div className="bg-purple-600 p-6 rounded-lg shadow-md">
-          <h3 className="text-purple-100 text-sm font-medium">My Courses</h3>
-          <p className="text-3xl font-bold mt-2 text-white">{stats.enrolledCourses}</p>
-        </div>
+        {/* "My Courses" only makes sense for students */}
+        {isStudent && (
+          <div className="bg-purple-600 p-6 rounded-lg shadow-md">
+            <h3 className="text-purple-100 text-sm font-medium">My Courses</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{stats.enrolledCourses}</p>
+          </div>
+        )}
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
@@ -90,7 +100,7 @@ export default function DashboardPage() {
         {stats.recentActivity.length > 0 ? (
           <div className="space-y-3">
             {stats.recentActivity.map((course: any) => (
-              <div key={course.id} className="border-b pb-3 flex justify-between items-center">
+              <div key={course.courseId} className="border-b pb-3 flex justify-between items-center">
                 <div>
                   <p className="font-medium">{course.title}</p>
                   <p className="text-sm text-gray-500">{course.description}</p>
