@@ -27,13 +27,19 @@ export default function TopNavbar() {
     { href: '/courses', label: 'Courses' },
   ];
 
-  // "My Courses" only makes sense for students (they're the ones who enroll)
+  // Students enroll in courses -- they get "My Courses" instead of managing Students/Instructors
   if (userRole === 'STUDENT') {
     navLinks.push({ href: '/my-courses', label: 'My Courses' });
   }
 
-  if (userRole === 'ADMIN') {
+  // Admins and Instructors both manage students
+  if (userRole === 'ADMIN' || userRole === 'INSTRUCTOR') {
     navLinks.push({ href: '/students', label: 'Students' });
+  }
+
+  // Only Admins manage instructors
+  if (userRole === 'ADMIN') {
+    navLinks.push({ href: '/instructors', label: 'Instructors' });
   }
 
   return (

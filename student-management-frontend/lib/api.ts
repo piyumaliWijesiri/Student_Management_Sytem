@@ -45,6 +45,15 @@ export const authAPI = {
     phone: string;
     address: string;
   }) => api.post('/auth/register', data),
+  registerInstructor: (data: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+    phone?: string;
+    hireDate?: string;
+  }) => api.post('/auth/register-instructor', data),
   // No backend /auth/logout endpoint (JWT is stateless) -- clear the token client-side instead
   logout: () => {
     localStorage.removeItem('token');
@@ -81,6 +90,34 @@ export const studentAPI = {
   create: (data: any) => api.post('/students', data),
   update: (id: string, data: any) => api.put(`/students/${id}`, data),
   delete: (id: string) => api.delete(`/students/${id}`),
+};
+
+// Course Material APIs (lecture notes: PDFs + video links, shown on a course's own page)
+export const materialAPI = {
+  getByCourse: (courseId: string) => api.get(`/materials/course/${courseId}`),
+
+  uploadPdf: (courseId: string, title: string, file: File) => {
+    const formData = new FormData();
+    formData.append('courseId', courseId);
+    formData.append('title', title);
+    formData.append('file', file);
+    return api.post('/materials/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  addVideo: (courseId: string, title: string, videoUrl: string) =>
+    api.post('/materials/video', { courseId, title, videoUrl }),
+
+  delete: (materialId: string) => api.delete(`/materials/${materialId}`),
+};
+
+// Instructor APIs (instructorId is a String, e.g. "INS-1001")
+export const instructorAPI = {
+  getAll: () => api.get('/instructors'),
+  getById: (id: string) => api.get(`/instructors/${id}`),
+  update: (id: string, data: any) => api.put(`/instructors/${id}`, data),
+  delete: (id: string) => api.delete(`/instructors/${id}`),
 };
 
 export default api;
