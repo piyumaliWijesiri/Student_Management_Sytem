@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { courseAPI } from '@/lib/api';
+import { enrollmentAPI } from '@/lib/api';
 
 export default function MyCoursesPage() {
   const router = useRouter();
-  const [courses, setCourses] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -22,8 +22,16 @@ export default function MyCoursesPage() {
 
   const fetchMyCourses = async () => {
     try {
-      const response = await courseAPI.getMyCourses();
-      setCourses(response.data);
+      const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
+
+      if (!studentId) {
+        setError('No student profile found for this account');
+        setLoading(false);
+        return;
+      }
+
+      const response = await enrollmentAPI.getMyCourses(studentId);
+      setEnrollments(response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load your courses');
     } finally {
@@ -49,18 +57,18 @@ export default function MyCoursesPage() {
         </div>
       )}
 
-      {courses.length > 0 ? (
+      {enrollments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: any) => (
-            <div key={course.id} className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-              <p className="text-gray-600 mb-4">{course.description}</p>
+          {enrollments.map((enrollment: any) => (
+            <div key={enrollment.enrollmentId} className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-2">{enrollment.course?.title}</h3>
+              <p className="text-gray-600 mb-4">{enrollment.course?.description}</p>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
-                  Instructor: {course.instructorName || 'Unknown'}
+                  Instructor: {enrollment.course?.instructorName || 'Unknown'}
                 </span>
                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                  Enrolled
+                  {enrollment.grade || 'Enrolled'}
                 </span>
               </div>
             </div>

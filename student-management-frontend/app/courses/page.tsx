@@ -12,6 +12,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (!auth.isAuthenticated()) {
@@ -23,8 +24,25 @@ export default function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await courseAPI.getAll();
-      setCourses(response.data);
+      const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
+
+      const [coursesRes, myEnrollmentsRes] = await Promise.all([
+        courseAPI.getAll(),
+        studentId ? enrollmentAPI.getMyCourses(studentId) : Promise.resolve({ data: [] }),
+      ]);
+
+      // Build a set of course IDs the student is already enrolled in
+      const enrolledCourseIds = new Set(
+        (myEnrollmentsRes.data || []).map((enrollment: any) => enrollment.course?.courseId)
+      );
+
+      // Mark each course as enrolled or not so the card can disable the button
+      const coursesWithStatus = (coursesRes.data || []).map((course: any) => ({
+        ...course,
+        enrolled: enrolledCourseIds.has(course.courseId),
+      }));
+
+      setCourses(coursesWithStatus);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load courses');
     } finally {
@@ -41,8 +59,12 @@ export default function CoursesPage() {
         return;
       }
 
+      setError('');
       await enrollmentAPI.enroll(studentId, courseId);
-      await fetchCourses(); // Refresh to update enrollment status
+      setSuccessMessage('Successfully enrolled in the course!');
+      await fetchCourses(); // Refresh so the course now shows as "Enrolled"
+
+      setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to enroll in course');
     }
@@ -66,6 +88,12 @@ export default function CoursesPage() {
           </button>
         )}
       </div>
+
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
