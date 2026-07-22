@@ -91,7 +91,7 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    // ✅ FIXED: 0.12.3 version එකට match වෙන parse method එක
+    
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
             .verifyWith(getSigningKey())

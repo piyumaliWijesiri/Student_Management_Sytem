@@ -5,13 +5,13 @@ import { useState } from 'react';
 
 interface CourseCardProps {
   course: {
-    id: number;
+    courseId: string;
     title: string;
     description: string;
     instructorName?: string;
     enrolled?: boolean;
   };
-  onEnroll: (id: number) => Promise<void>;
+  onEnroll: (courseId: string) => Promise<void>;
 }
 
 export default function CourseCard({ course, onEnroll }: CourseCardProps) {
@@ -20,14 +20,14 @@ export default function CourseCard({ course, onEnroll }: CourseCardProps) {
   const handleEnroll = async () => {
     setEnrolling(true);
     try {
-      await onEnroll(course.id);
+      await onEnroll(course.courseId);
     } finally {
       setEnrolling(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-blue rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="p-6">
         <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
         <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>

@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public class Course {
     
     @Id
-    @Column(name = "course_id", length = 20)  // ✅ course_id VARCHAR(20) primary key
-    private String courseId;  // ✅ String type (Long නෙමෙයි!)
+    @Column(name = "course_id", length = 20)  
+    private String courseId;  
     
     @Column(name = "instructor_id", length = 20)
-    private String instructorId;  // ✅ String type
+    private String instructorId;  
     
     @Column(name = "course_name", nullable = false, length = 150)
     private String courseName;
@@ -30,7 +30,7 @@ public class Course {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ============ GETTERS AND SETTERS ============
+    //GETTERS AND SETTERS 
     
     public String getCourseId() {
         return courseId;

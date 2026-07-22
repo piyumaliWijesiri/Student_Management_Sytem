@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { courseAPI, studentAPI } from '@/lib/api';
+import { courseAPI, studentAPI, enrollmentAPI } from '@/lib/api';
 
 interface DashboardStats {
   totalStudents: number;
@@ -33,10 +33,12 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
+      const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
+
       const [studentsRes, coursesRes, myCoursesRes] = await Promise.all([
         studentAPI.getAll(),
         courseAPI.getAll(),
-        courseAPI.getMyCourses(),
+        studentId ? enrollmentAPI.getMyCourses(studentId) : Promise.resolve({ data: [] }),
       ]);
 
       setStats({
@@ -54,7 +56,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
         <div className="text-xl">Loading dashboard...</div>
       </div>
     );
@@ -69,17 +71,17 @@ export default function DashboardPage() {
       </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-gray-500 text-sm font-medium">Total Students</h3>
-          <p className="text-3xl font-bold mt-2">{stats.totalStudents}</p>
+        <div className="bg-blue-600 p-6 rounded-lg shadow-md">
+          <h3 className="text-blue-100 text-sm font-medium">Total Students</h3>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.totalStudents}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-gray-500 text-sm font-medium">Available Courses</h3>
-          <p className="text-3xl font-bold mt-2">{stats.totalCourses}</p>
+        <div className="bg-green-600 p-6 rounded-lg shadow-md">
+          <h3 className="text-green-100 text-sm font-medium">Available Courses</h3>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.totalCourses}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-gray-500 text-sm font-medium">My Courses</h3>
-          <p className="text-3xl font-bold mt-2">{stats.enrolledCourses}</p>
+        <div className="bg-purple-600 p-6 rounded-lg shadow-md">
+          <h3 className="text-purple-100 text-sm font-medium">My Courses</h3>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.enrolledCourses}</p>
         </div>
       </div>
 

@@ -27,10 +27,21 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const isValidEmail = (email: string) => {
+    // Requires an "@" with text before and after, and a "." in the domain part
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
+    if (!isValidEmail(formData.email)) {
+      setError('Please enter a valid email address (must contain @)');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -150,6 +161,8 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="name@school.edu"
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              title="Email must contain @ and a valid domain (e.g. name@school.edu)"
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               required
             />

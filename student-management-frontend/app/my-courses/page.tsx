@@ -33,7 +33,7 @@ export default function MyCoursesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
         <div className="text-xl">Loading your courses...</div>
       </div>
     );

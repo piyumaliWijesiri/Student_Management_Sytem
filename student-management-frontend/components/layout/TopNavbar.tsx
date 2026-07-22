@@ -33,11 +33,11 @@ export default function TopNavbar() {
   }
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-blue-900 shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-blue-600">
+            <Link href="/" className="text-xl font-bold text-white">
               Student MS
             </Link>
           </div>
@@ -50,8 +50,8 @@ export default function TopNavbar() {
                   href={link.href}
                   className={`${
                     pathname === link.href
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? 'text-white border-b-2 border-white'
+                      : 'text-blue-100 hover:text-white'
                   } px-3 py-2 text-sm font-medium transition-colors`}
                 >
                   {link.label}
@@ -63,7 +63,7 @@ export default function TopNavbar() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-gray-600 hidden sm:inline">
+                <span className="text-sm text-blue-100 hidden sm:inline">
                   {userRole}
                 </span>
                 <button
@@ -77,13 +77,13 @@ export default function TopNavbar() {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50"
+                  className="px-4 py-2 text-sm font-medium text-white border border-white rounded-md hover:bg-blue-800"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 text-sm font-medium text-blue-900 bg-white rounded-md hover:bg-blue-50"
                 >
                   Register
                 </Link>

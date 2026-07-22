@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CourseCard from '@/components/courses/CourseCard';
 import { auth } from '@/lib/auth';
-import { courseAPI } from '@/lib/api';
+import { courseAPI, enrollmentAPI } from '@/lib/api';
 
 export default function CoursesPage() {
   const router = useRouter();
@@ -32,9 +32,16 @@ export default function CoursesPage() {
     }
   };
 
-  const handleEnroll = async (courseId: number) => {
+  const handleEnroll = async (courseId: string) => {
     try {
-      await courseAPI.enroll(courseId);
+      const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
+
+      if (!studentId) {
+        setError('You must be logged in as a student to enroll');
+        return;
+      }
+
+      await enrollmentAPI.enroll(studentId, courseId);
       await fetchCourses(); // Refresh to update enrollment status
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to enroll in course');
@@ -70,7 +77,7 @@ export default function CoursesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course: any) => (
             <CourseCard
-              key={course.id}
+              key={course.courseId}
               course={course}
               onEnroll={handleEnroll}
             />

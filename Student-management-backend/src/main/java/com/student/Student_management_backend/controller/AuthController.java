@@ -6,6 +6,7 @@ import com.student.Student_management_backend.model.Student;
 import com.student.Student_management_backend.model.User;
 import com.student.Student_management_backend.repository.StudentRepository;
 import com.student.Student_management_backend.repository.UserRepository;
+import com.student.Student_management_backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     @Transactional
@@ -89,11 +93,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody("Invalid username/email or password"));
         }
 
+        // Find the student record linked to this user (if any) so the frontend gets a studentId
+        Optional<Student> studentOpt = studentRepository.findByUser_UserId(user.getUserId());
+
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+
         Map<String, Object> response = new HashMap<>();
         response.put("userId", user.getUserId());
         response.put("username", user.getUsername());
         response.put("role", user.getRole());
-        response.put("token", "placeholder-token-day4-will-add-jwt");
+        response.put("token", token);
+        studentOpt.ifPresent(student -> response.put("studentId", student.getStudentId()));
 
         return ResponseEntity.ok(response);
     }

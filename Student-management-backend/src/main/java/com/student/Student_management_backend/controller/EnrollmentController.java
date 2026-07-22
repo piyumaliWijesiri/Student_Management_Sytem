@@ -30,13 +30,15 @@ public class EnrollmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // studentId is a String (e.g. "STU-1001"), not a UUID -- matches Student model
     @GetMapping("/student/{studentId}")
-    public List<Enrollment> getEnrollmentsByStudent(@PathVariable UUID studentId) {
+    public List<Enrollment> getEnrollmentsByStudent(@PathVariable String studentId) {
         return enrollmentRepository.findByStudent_StudentId(studentId);
     }
 
+    // courseId is a String (e.g. "ICT001"), not a UUID -- matches Course model
     @GetMapping("/course/{courseId}")
-    public List<Enrollment> getEnrollmentsByCourse(@PathVariable UUID courseId) {
+    public List<Enrollment> getEnrollmentsByCourse(@PathVariable String courseId) {
         return enrollmentRepository.findByCourse_CourseId(courseId);
     }
 
