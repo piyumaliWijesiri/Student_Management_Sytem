@@ -33,8 +33,24 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // CORS preflight requests
-                .requestMatchers("/api/auth/**").permitAll()  // Login, Register
-                .requestMatchers("/api/courses").permitAll()  // Courses
+                .requestMatchers("/api/auth/**").permitAll()  // Login, Register, Register-admin
+                .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/**").permitAll()  // Browse courses
+                .requestMatchers("/files/**").permitAll()  // Uploaded PDF downloads
+
+                // Courses -- only ADMIN can create/update/delete
+                .requestMatchers(HttpMethod.POST, "/api/courses").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
+
+                // Students -- only ADMIN can create/update/delete
+                .requestMatchers(HttpMethod.POST, "/api/students").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/students/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/students/**").hasRole("ADMIN")
+
+                // Course materials -- ADMIN/INSTRUCTOR can upload/delete, anyone logged in can view
+                .requestMatchers(HttpMethod.POST, "/api/materials/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/materials/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> 

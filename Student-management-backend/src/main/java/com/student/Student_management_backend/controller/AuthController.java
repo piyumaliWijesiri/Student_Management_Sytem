@@ -72,6 +72,40 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // Creates a plain User account with role ADMIN (or INSTRUCTOR) -- no Student record needed.
+    // NOTE: this endpoint is left open for development/setup. Lock it down (e.g. remove it,
+    // or protect it behind an existing ADMIN's token) before deploying anywhere real.
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> request) {
+
+        String username = request.get("username");
+        String password = request.get("password");
+        String role = request.getOrDefault("role", "ADMIN"); // ADMIN or INSTRUCTOR
+
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(errorBody("username and password are required"));
+        }
+        if (!role.equals("ADMIN") && !role.equals("INSTRUCTOR")) {
+            return ResponseEntity.badRequest().body(errorBody("role must be ADMIN or INSTRUCTOR"));
+        }
+        if (userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody("Username already taken"));
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setRole(role);
+        user = userRepository.save(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", user.getUserId());
+        response.put("username", user.getUsername());
+        response.put("role", user.getRole());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 

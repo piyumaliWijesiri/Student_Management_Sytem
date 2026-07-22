@@ -25,8 +25,12 @@ export default function TopNavbar() {
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/courses', label: 'Courses' },
-    { href: '/my-courses', label: 'My Courses' },
   ];
+
+  // "My Courses" only makes sense for students (they're the ones who enroll)
+  if (userRole === 'STUDENT') {
+    navLinks.push({ href: '/my-courses', label: 'My Courses' });
+  }
 
   if (userRole === 'ADMIN') {
     navLinks.push({ href: '/students', label: 'Students' });
