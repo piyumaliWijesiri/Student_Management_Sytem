@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/**").permitAll()  // Browse courses
                 .requestMatchers("/files/**").permitAll()  // Uploaded PDF downloads
 
-                // Courses -- only ADMIN can create/update/delete
+                // Courses  only ADMIN can create/update/delete
                 .requestMatchers(HttpMethod.POST, "/api/courses").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
