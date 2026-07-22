@@ -27,9 +27,14 @@ export default function CourseCard({ course, onEnroll }: CourseCardProps) {
   };
 
   return (
-    <div className="bg-blue rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-blue-50 border border-blue-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-xl font-semibold text-blue-900">{course.title}</h3>
+          <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+            {course.courseId}
+          </span>
+        </div>
         <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500">
