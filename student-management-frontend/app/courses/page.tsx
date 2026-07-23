@@ -3,16 +3,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import CourseCard from '@/components/courses/CourseCard';
 import { auth } from '@/lib/auth';
 import { courseAPI, enrollmentAPI } from '@/lib/api';
 
+const courseImages = [
+  '/courses/course1.png',
+  '/courses/course2.png',
+  '/courses/course3.png',
+];
+
 export default function CoursesPage() {
   const router = useRouter();
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) {
@@ -31,18 +37,16 @@ export default function CoursesPage() {
         studentId ? enrollmentAPI.getMyCourses(studentId) : Promise.resolve({ data: [] }),
       ]);
 
-      // Build a set of course IDs the student is already enrolled in
       const enrolledCourseIds = new Set(
         (myEnrollmentsRes.data || []).map((enrollment: any) => enrollment.course?.courseId)
       );
 
-      // Mark each course as enrolled or not so the card can disable the button
-      const coursesWithStatus = (coursesRes.data || []).map((course: any) => ({
-        ...course,
-        enrolled: enrolledCourseIds.has(course.courseId),
-      }));
+      // Only keep courses the student is NOT already enrolled in
+      const availableCourses = (coursesRes.data || []).filter(
+        (course: any) => !enrolledCourseIds.has(course.courseId)
+      );
 
-      setCourses(coursesWithStatus);
+      setCourses(availableCourses);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load courses');
     } finally {
@@ -60,13 +64,16 @@ export default function CoursesPage() {
       }
 
       setError('');
+      setEnrollingId(courseId);
       await enrollmentAPI.enroll(studentId, courseId);
       setSuccessMessage('Successfully enrolled in the course!');
-      await fetchCourses(); // Refresh so the course now shows as "Enrolled"
+      await fetchCourses(); // Refresh -- enrolled course disappears from this list
 
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to enroll in course');
+    } finally {
+      setEnrollingId(null);
     }
   };
 
@@ -82,11 +89,6 @@ export default function CoursesPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Available Courses</h1>
-        {auth.getRole() === 'ADMIN' && (
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-            Add New Course
-          </button>
-        )}
       </div>
 
       {successMessage && (
@@ -103,16 +105,33 @@ export default function CoursesPage() {
 
       {courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: any) => (
-            <CourseCard
+          {courses.map((course: any, index: number) => (
+            <div
               key={course.courseId}
-              course={course}
-              onEnroll={handleEnroll}
-            />
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100 flex flex-col"
+            >
+              <img
+                src={courseImages[index % courseImages.length]}
+                alt={course.courseName}
+                className="w-full h-40 object-contain bg-gray-50 p-4"
+              />
+              <div className="p-5 flex flex-col flex-1">
+                <h3 className="font-semibold text-gray-900 text-lg">{course.courseName}</h3>
+                <p className="text-sm text-gray-500 mt-1 flex-1">{course.description}</p>
+
+                <button
+                  onClick={() => handleEnroll(course.courseId)}
+                  disabled={enrollingId === course.courseId}
+                  className="mt-4 w-full py-2 rounded-md text-sm font-medium bg-blue-900 text-white hover:bg-blue-800 disabled:opacity-50 transition-colors"
+                >
+                  {enrollingId === course.courseId ? 'Enrolling...' : 'Enroll'}
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">No courses available at the moment.</p>
+        <p className="text-gray-500">You're enrolled in every available course. Check back later for new ones!</p>
       )}
     </div>
   );
