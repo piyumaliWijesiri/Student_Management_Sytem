@@ -35,6 +35,7 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [role, setRole] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -52,6 +53,7 @@ export default function StudentsPage() {
       router.push('/dashboard');
       return;
     }
+    setRole(auth.getRole());
     fetchStudents();
   }, [router]);
 
@@ -73,7 +75,7 @@ export default function StudentsPage() {
 
       const map: Record<string, string[]> = {};
       enrollmentResults.forEach(({ studentId, courses }: any) => {
-        map[studentId] = courses.map((enrollment: any) => enrollment.course?.title).filter(Boolean);
+        map[studentId] = courses.map((enrollment: any) => enrollment.course?.courseName).filter(Boolean);
       });
       setEnrolledCoursesByStudent(map);
     } catch (err: any) {
@@ -159,6 +161,8 @@ export default function StudentsPage() {
     }
   };
 
+  const isAdmin = role === 'ADMIN';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -171,12 +175,14 @@ export default function StudentsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Students</h1>
-        <button
-          onClick={openAddModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
-        >
-          + Add Student
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAddModal}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
+          >
+            + Add Student
+          </button>
+        )}
       </div>
 
       {successMessage && (
@@ -199,7 +205,9 @@ export default function StudentsPage() {
               <th className="px-4 py-3 text-left text-xs font-medium text-blue-900 uppercase">Email</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-blue-900 uppercase">Phone</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-blue-900 uppercase">Enrolled Courses</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-blue-900 uppercase">Actions</th>
+              {isAdmin && (
+                <th className="px-4 py-3 text-right text-xs font-medium text-blue-900 uppercase">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-blue-200">
@@ -230,26 +238,28 @@ export default function StudentsPage() {
                         <span className="text-gray-400 text-xs">No courses</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-right space-x-3">
-                      <button
-                        onClick={() => openEditModal(student)}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(student)}
-                        className="text-red-600 hover:text-red-800 font-medium"
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    {isAdmin && (
+                      <td className="px-4 py-3 text-sm text-right space-x-3">
+                        <button
+                          onClick={() => openEditModal(student)}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(student)}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                <td colSpan={isAdmin ? 6 : 5} className="px-4 py-6 text-center text-gray-500">
                   No students found.
                 </td>
               </tr>
@@ -259,7 +269,7 @@ export default function StudentsPage() {
       </div>
 
       {/* Add/Edit Modal */}
-      {showModal && (
+      {showModal && isAdmin && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           onClick={() => setShowModal(false)}
@@ -358,7 +368,7 @@ export default function StudentsPage() {
       )}
 
       {/* Delete confirmation */}
-      {deleteTarget && (
+      {deleteTarget && isAdmin && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           onClick={() => setDeleteTarget(null)}
