@@ -53,6 +53,7 @@ export const auth = {
     document.cookie = `token=${data.token}; path=/; max-age=86400`;
   },
 
+  // Clears session data only -- caller (e.g. TopNavbar) decides where to redirect
   logout: () => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('token');
@@ -61,6 +62,5 @@ export const auth = {
     localStorage.removeItem('username');
     localStorage.removeItem('studentId');
     document.cookie = 'token=; path=/; max-age=0';
-    window.location.href = '/login';
   },
 };

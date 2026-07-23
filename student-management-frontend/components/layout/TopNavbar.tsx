@@ -19,7 +19,7 @@ export default function TopNavbar() {
 
   const handleLogout = () => {
     auth.logout();
-    router.push('/login');
+    router.push('/');
   };
 
   const navLinks = [
@@ -70,15 +70,15 @@ export default function TopNavbar() {
             </div>
           )}
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-blue-100 hidden sm:inline">
+                <span className="text-xs text-blue-100 hidden sm:inline">
                   {userRole}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                  className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
                 >
                   Logout
                 </button>
@@ -87,13 +87,13 @@ export default function TopNavbar() {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-white border border-white rounded-md hover:bg-blue-800"
+                  className="px-3 py-1.5 text-xs font-medium text-white border border-white rounded hover:bg-blue-800"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium text-blue-900 bg-white rounded-md hover:bg-blue-50"
+                  className="px-3 py-1.5 text-xs font-medium text-blue-900 bg-white rounded hover:bg-blue-50"
                 >
                   Register
                 </Link>
