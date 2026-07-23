@@ -6,6 +6,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { courseAPI, instructorAPI } from '@/lib/api';
 
+const courseImages = [
+  '/courses/course1.png',
+  '/courses/course2.png',
+  '/courses/course3.png',
+];
+
 export default function LandingPage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [instructors, setInstructors] = useState<any[]>([]);
@@ -75,11 +81,16 @@ export default function LandingPage() {
             <p className="text-center text-gray-500">No courses available right now.</p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {courses.map((course) => (
+              {courses.map((course, index) => (
                 <div
                   key={course.courseId}
                   className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow text-center"
                 >
+                  <img
+                    src={courseImages[index % courseImages.length]}
+                    alt={course.courseName}
+                    className="w-full h-32 object-contain mb-3"
+                  />
                   <h3 className="font-semibold text-gray-900">{course.courseName}</h3>
                   <p className="text-sm text-gray-500 mt-1">{course.description}</p>
                 </div>
