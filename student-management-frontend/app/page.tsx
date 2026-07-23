@@ -70,7 +70,7 @@ export default function LandingPage() {
       </section>
 
       {/* Courses */}
-      <section id="courses" className="bg-gray-50 py-16">
+      <section id="courses" className="bg-gray-50 py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-blue-900 mb-2">Our Courses</h2>
           <p className="text-center text-gray-600 mb-10">Explore our available courses</p>

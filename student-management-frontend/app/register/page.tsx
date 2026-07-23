@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { authAPI } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -56,29 +57,38 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      // Prepare data for backend
-      const registerData = {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-        role: formData.role,
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
-        dateOfBirth: formData.dateOfBirth
-      };
+      if (formData.role === 'STUDENT') {
+        await authAPI.register({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          dateOfBirth: formData.dateOfBirth,
+          phone: formData.phoneNumber,
+          address: formData.address,
+        });
+      } else if (formData.role === 'INSTRUCTOR') {
+        await authAPI.registerInstructor({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phoneNumber,
+          hireDate: formData.dateOfBirth, // instructors don't have dateOfBirth in the backend -- reusing this field for hireDate
+        });
+      } else {
+        // No public "register as Admin" endpoint exists on the backend.
+        // Admin accounts should be created by an existing Admin, not through public registration.
+        setError('Admin accounts cannot be self-registered. Please contact an existing admin.');
+        setLoading(false);
+        return;
+      }
 
-      console.log('Registering:', registerData);
-      
-      // TODO: Connect to backend API
-      // const response = await authAPI.register(registerData);
-      
-      // Temporary success
-      localStorage.setItem('registered', 'true');
       router.push('/login?registered=true');
-      
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -204,7 +214,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of birth
+                {formData.role === 'INSTRUCTOR' ? 'Hire date' : 'Date of birth'}
               </label>
               <input
                 type="date"
@@ -229,20 +239,22 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="123 Main Street, Colombo"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-            />
-          </div>
+          {/* Address (Students only -- not stored for instructors) */}
+          {formData.role !== 'INSTRUCTOR' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="123 Main Street, Colombo"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+              />
+            </div>
+          )}
 
           {/* Role */}
           <div>
@@ -259,7 +271,6 @@ export default function RegisterPage() {
               <option value="">Select role</option>
               <option value="STUDENT">Student</option>
               <option value="INSTRUCTOR">Instructor</option>
-              <option value="ADMIN">Admin</option>
             </select>
           </div>
 
