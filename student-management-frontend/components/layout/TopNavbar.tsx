@@ -27,7 +27,7 @@ export default function TopNavbar() {
     { href: '/courses', label: 'Courses' },
   ];
 
-  // Students enroll in courses -- they get "My Courses" instead of managing Students/Instructors
+  // Students enroll in courses 
   if (userRole === 'STUDENT') {
     navLinks.push({ href: '/my-courses', label: 'My Courses' });
   }

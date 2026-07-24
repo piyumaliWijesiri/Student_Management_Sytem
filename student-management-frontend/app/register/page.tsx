@@ -20,10 +20,9 @@ export default function RegisterPage() {
     dateOfBirth: '',
     phoneNumber: '',
     address: '',
-    role: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -48,43 +47,20 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!formData.role) {
-      setError('Please select a role');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
     try {
-      if (formData.role === 'STUDENT') {
-        await authAPI.register({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          dateOfBirth: formData.dateOfBirth,
-          phone: formData.phoneNumber,
-          address: formData.address,
-        });
-      } else if (formData.role === 'INSTRUCTOR') {
-        await authAPI.registerInstructor({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phoneNumber,
-          hireDate: formData.dateOfBirth, // instructors don't have dateOfBirth in the backend -- reusing this field for hireDate
-        });
-      } else {
-        // No public "register as Admin" endpoint exists on the backend.
-        // Admin accounts should be created by an existing Admin, not through public registration.
-        setError('Admin accounts cannot be self-registered. Please contact an existing admin.');
-        setLoading(false);
-        return;
-      }
+      await authAPI.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        dateOfBirth: formData.dateOfBirth,
+        phone: formData.phoneNumber,
+        address: formData.address,
+      });
 
       router.push('/login?registered=true');
     } catch (err: any) {
@@ -99,7 +75,7 @@ export default function RegisterPage() {
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Create a student account</h2>
           <p className="mt-2 text-sm text-gray-600">Fill in your details to register</p>
         </div>
 
@@ -214,7 +190,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {formData.role === 'INSTRUCTOR' ? 'Hire date' : 'Date of birth'}
+                Date of birth
               </label>
               <input
                 type="date"
@@ -239,39 +215,19 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Address (Students only -- not stored for instructors) */}
-          {formData.role !== 'INSTRUCTOR' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="123 Main Street, Colombo"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              />
-            </div>
-          )}
-
-          {/* Role */}
+          {/* Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
+              Address
             </label>
-            <select
-              name="role"
-              value={formData.role}
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
-              required
-            >
-              <option value="">Select role</option>
-              <option value="STUDENT">Student</option>
-              <option value="INSTRUCTOR">Instructor</option>
-            </select>
+              placeholder="123 Main Street, Colombo"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            />
           </div>
 
           {/* Submit Button */}
